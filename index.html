@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tic Tac Toe</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: url("bg.jpg") no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+    }
+
+    h1 {
+      color: #61dafb;
+      font-size: 2.5em;
+      margin-top: 20px;
+    }
+
+    /* Main container with subtle background gradient */
+    .game-container {
+      background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.35) 0%,
+        rgba(0, 0, 0, 0.55) 100%
+      );
+      border: 1px solid rgba(248, 210, 16, 0.6);
+      border-radius: 10px;
+      width: 90%;
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      box-shadow: 0 0 15px rgba(248, 210, 16, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    /* Control panel styling */
+    .control-panel {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 15px;
+      border-radius: 10px;
+      margin: 20px auto 0 auto;
+      max-width: 700px;
+      transition: background-color 0.3s ease;
+    }
+    /* In single-player mode, display controls in one row */
+    .control-panel.single-player {
+      flex-direction: row;
+      gap: 30px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .control-group label {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    /* Matching input and select styling */
+    .control-group select,
+    .control-group input {
+      padding: 5px;
+      font-size: 1em;
+      border-radius: 3px;
+      border: 2px solid #f8d210;
+      text-align: center;
+      background-color: #333;
+      color: #f8f8f8;
+      width: 150px;
+    }
+
+    /* Board styling */
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 5px;
+      margin: 20px auto;
+      width: 320px;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background-color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em;
+      font-weight: bold;
+      color: #f8f8f8;
+      border: 2px solid #f8d210;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease, color 0.3s ease;
+    }
+    .cell:hover {
+      background-color: #f8d210;
+      color: #333;
+      transform: scale(1.1);
+    }
+
+    .message {
+      font-size: 1.5em;
+      margin-top: 20px;
+      font-weight: bold;
+      color: #f8d210;
+    }
+
+    #scoreboard {
+      font-size: 1.2em;
+      margin-top: 10px;
+      color: #61dafb;
+    }
+
+    .action-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1.2em;
+      cursor: pointer;
+      background-color: #f8d210;
+      color: black;
+      border: none;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+    .action-btn:hover {
+      background-color: #ff6347;
+      color: white;
+    }
+
+    .winner {
+      color: #ff6347;
+      font-size: 2em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tic Tac Toe</h1>
+  <!-- Game container with gradient background -->
+  <div class="game-container">
+    <div class="control-panel" id="controlPanel">
+      <!-- Mode selector -->
+      <div class="control-group" id="modeGroup">
+        <label for="mode">Choose Mode</label>
+        <select id="mode" onchange="setMode()">
+          <option value="multi">Multiplayer</option>
+          <option value="easy">Single Player (Easy)</option>
+          <option value="medium">Single Player (Medium)</option>
+          <option value="hard">Single Player (Hard)</option>
+        </select>
+      </div>
+      <!-- Name inputs will be injected here -->
+      <div class="control-group" id="nameInputs">
+      </div>
+      <!-- Symbol selector (only used in single-player mode) -->
+      <div class="control-group" id="playerSelectionDiv">
+        <label for="player">Choose Your Symbol</label>
+        <select id="player" onchange="setPlayer()">
+          <option value="X">X</option>
+          <option value="O">O</option>
+        </select>
+      </div>
+    </div>
+    
+    <div id="scoreboard">Games: 0/10 | </div>
+    <div class="board" id="board"></div>
+    <div class="message" id="message"></div>
+    <button class="action-btn" id="nextBtn" onclick="nextGame()">Next Game</button>
+  </div>
+
+  <script>
+    let gameState = {};
+
+    // Initialize or reset the game by sending settings to the backend.
+    function initGame() {
+      const mode = document.getElementById("mode").value;
+      const userPlayer = document.getElementById("player").value;
+      let data = { mode: mode, user_player: userPlayer };
+
+      if (mode === "multi") {
+        data.playerXName = document.getElementById("playerXNameInput")
+          ? document.getElementById("playerXNameInput").value
+          : "Player X";
+        data.playerOName = document.getElementById("playerONameInput")
+          ? document.getElementById("playerONameInput").value
+          : "Player O";
+      } else {
+        data.userName = document.getElementById("userNameInput")
+          ? document.getElementById("userNameInput").value
+          : "Player";
+      }
+
+      fetch("/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          gameState = data;
+          renderGame();
+        });
+    }
+
+    // Render the board, scoreboard, and message.
+    function renderGame() {
+      const boardDiv = document.getElementById("board");
+      boardDiv.innerHTML = "";
+      gameState.board.forEach((cell, index) => {
+        const cellDiv = document.createElement("div");
+        cellDiv.className = "cell";
+        cellDiv.innerText = cell;
+        cellDiv.addEventListener("click", () => makeMove(index));
+        boardDiv.appendChild(cellDiv);
+      });
+      document.getElementById("message").innerHTML = gameState.message;
+      document.getElementById("scoreboard").innerText = gameState.scoreboard;
+      document.getElementById("nextBtn").disabled = gameState.game_active;
+    }
+
+    // Send a move to the backend.
+    function makeMove(index) {
+      fetch("/move", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ index: index })
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          gameState = data;
+          renderGame();
+        });
+    }
+
+    // Advance to the next game (or reset match if completed).
+    function nextGame() {
+      fetch("/next", { method: "POST" })
+        .then((response) => response.json())
+        .then((data) => {
+          gameState = data;
+          renderGame();
+        });
+    }
+
+    // When mode changes, update inputs and restart the game.
+    function setMode() {
+      updateNameInputs();
+      initGame();
+    }
+
+    // When symbol selection changes.
+    function setPlayer() {
+      initGame();
+    }
+
+    // Update name input fields and control layout based on mode.
+    function updateNameInputs() {
+      const mode = document.getElementById("mode").value;
+      const controlPanel = document.getElementById("controlPanel");
+      const nameDiv = document.getElementById("nameInputs");
+      const symbolDiv = document.getElementById("playerSelectionDiv");
+      const modeGroup = document.getElementById("modeGroup");
+
+      if (mode === "multi") {
+        // Multi-player mode: show two name inputs and hide symbol selector.
+        controlPanel.classList.remove("single-player");
+        nameDiv.innerHTML = `
+          <label for="playerXNameInput" style="font-weight:bold;">Player X Name</label>
+          <input type="text" id="playerXNameInput" value="Player X" onchange="initGame()" />
+          <label for="playerONameInput" style="font-weight:bold; margin-top:10px;">Player O Name</label>
+          <input type="text" id="playerONameInput" value="Player O" onchange="initGame()" />
+        `;
+        symbolDiv.style.display = "none";
+        // Ensure order: mode group, then name inputs, then (hidden) symbol group.
+        controlPanel.innerHTML = "";
+        controlPanel.appendChild(modeGroup);
+        controlPanel.appendChild(nameDiv);
+        controlPanel.appendChild(symbolDiv);
+      } else {
+        // Single-player mode: show one name input and the symbol selector.
+        controlPanel.classList.add("single-player");
+        nameDiv.innerHTML = `
+          <label for="userNameInput" style="font-weight:bold;">Your Name</label>
+          <input type="text" id="userNameInput" value="Player" onchange="initGame()" />
+        `;
+        symbolDiv.style.display = "flex";
+        // Order: mode group, then name input, then symbol selector.
+        controlPanel.innerHTML = "";
+        controlPanel.appendChild(modeGroup);
+        controlPanel.appendChild(nameDiv);
+        controlPanel.appendChild(symbolDiv);
+      }
+    }
+
+    // On initial load
+    document.addEventListener("DOMContentLoaded", () => {
+      updateNameInputs();
+      initGame();
+    });
+  </script>
+</body>
+</html>

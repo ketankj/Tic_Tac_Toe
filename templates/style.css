@@ -1,0 +1,140 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: url("bg.jpg") no-repeat center center fixed;
+    background-size: cover;
+    color: white;
+  }
+  
+  h1 {
+    color: #61dafb;
+    font-size: 2.5em;
+    margin-top: 20px;
+  }
+  
+  /* Main container with subtle background gradient */
+  .game-container {
+    background: linear-gradient(
+      135deg,
+      rgba(0, 0, 0, 0.35) 0%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
+    border: 1px solid rgba(248, 210, 16, 0.6);
+    border-radius: 10px;
+    width: 90%;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(248, 210, 16, 0.2);
+    transition: all 0.3s ease;
+  }
+  
+  /* Control panel styling */
+  .control-panel {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px auto 0 auto;
+    max-width: 700px;
+    transition: background-color 0.3s ease;
+  }
+  
+  /* In single-player mode, display controls in one row */
+  .control-panel.single-player {
+    flex-direction: row;
+    gap: 30px;
+  }
+  
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .control-group label {
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  /* Matching input and select styling */
+  .control-group select,
+  .control-group input {
+    padding: 5px;
+    font-size: 1em;
+    border-radius: 3px;
+    border: 2px solid #f8d210;
+    text-align: center;
+    background-color: #333;
+    color: #f8f8f8;
+    width: 150px;
+  }
+  
+  /* Board styling */
+  .board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 5px;
+    margin: 20px auto;
+    width: 320px;
+  }
+  
+  .cell {
+    width: 100px;
+    height: 100px;
+    background-color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    font-weight: bold;
+    color: #f8f8f8;
+    border: 2px solid #f8d210;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, color 0.3s ease;
+  }
+  .cell:hover {
+    background-color: #f8d210;
+    color: #333;
+    transform: scale(1.1);
+  }
+  
+  .message {
+    font-size: 1.5em;
+    margin-top: 20px;
+    font-weight: bold;
+    color: #f8d210;
+  }
+  
+  #scoreboard {
+    font-size: 1.2em;
+    margin-top: 10px;
+    color: #61dafb;
+  }
+  
+  .action-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 1.2em;
+    cursor: pointer;
+    background-color: #f8d210;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+  .action-btn:hover {
+    background-color: #ff6347;
+    color: white;
+  }
+  
+  .winner {
+    color: #ff6347;
+    font-size: 2em;
+  }
+  
